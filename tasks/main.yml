@@ -1,0 +1,284 @@
+- name: Update OS packages
+  package:
+    name: '*'
+    state: latest
+  tags:
+    - nginx
+    - webserver
+
+# For Ubuntu
+# Note: Use libssl package.
+- name: Install OS packages
+  package:
+    name:
+      - build-essential
+      - libpcre3-dev
+      - zlib1g-dev
+      - libxslt1-dev
+      - libgd-dev
+      - google-perftools
+      - libgoogle-perftools-dev
+      - libssl-dev
+      - libxml2-dev
+      - libperl-dev
+      - libgeoip-dev
+      - libmaxminddb-dev
+    state: latest
+  when: ansible_os_family == 'Debian'
+  tags:
+    - nginx
+    - webserver
+
+# For CentOS
+# Note: Don't use openssl pacakge, build from source code.
+- name: Install OS packages
+  package:
+    name:
+      - gcc
+      - pcre-devel
+      - zlib-devel
+      - libxslt-devel
+      - gd-devel
+      - gperftools-devel
+      - libxml2-devel
+      - perl-ExtUtils-Embed
+      - epel-release
+      - libmaxminddb-devel
+    state: latest
+  when: ansible_os_family == 'RedHat'
+  tags:
+    - nginx
+    - webserver
+
+- name: Delete OS packages of nginx
+  package:
+    name:
+      - nginx
+    state: absent
+  tags:
+    - nginx
+    - webserver
+
+- name: Create a local src directory
+  file:
+    path: "/usr/local/src"
+    state: directory
+    mode: 0755
+  tags:
+    - nginx
+    - webserver
+
+# Download, build and install openssl
+- name: Download openssl from github
+  get_url:
+    url: "{{ openssl_mirror }}/openssl-{{ openssl_ver }}.tar.gz"
+    dest: "/usr/local/src/openssl-{{ openssl_ver }}.tar.gz"
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'FreeBSD'
+  tags:
+    - nginx
+    - webserver
+
+- name: Check openssl source file exists
+  stat:
+    path: "/usr/local/src/openssl-{{ openssl_ver }}.tar.gz"
+  register: openssl_path
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'FreeBSD'
+  tags:
+    - nginx
+    - webserver
+
+- name: Unarchive openssl tar file
+  unarchive:
+    remote_src: yes
+    src: "/usr/local/src/openssl-{{ openssl_ver }}.tar.gz"
+    dest: "/usr/local/src/"
+  when:
+    - openssl_path is defined and 'stat' in openssl_path and openssl_path.stat.exists
+    - not ansible_check_mode
+  tags:
+    - nginx
+    - webserver
+
+- name: Check openssl source directory exists
+  stat:
+    path: "/usr/local/src/openssl-{{ openssl_ver }}"
+  register: openssl_dir
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'FreeBSD'
+  tags:
+    - nginx
+    - webserver
+
+- name: Install openssl
+  shell:
+    chdir: "/usr/local/src/openssl-{{ openssl_ver }}"
+    cmd: 'make && make install'
+  when:
+    - openssl_dir is defined and 'stat' in openssl_dir and openssl_dir.stat.exists
+    - not ansible_check_mode
+  tags:
+    - nginx
+    - webserver
+
+# Download, build and install luajit2
+# ---
+# LuaJIT ought to run all Lua 5.1-compatible source code just fine.
+# Reference: https://luajit.org/status.html
+- name: Download luajit2 from github
+  git:
+    repo: https://github.com/openresty/luajit2.git
+    dest: /usr/local/src/luajit2
+    version: "{{ luajit_ver }}"
+  tags:
+    - nginx
+    - webserver
+
+- name: Install luajit2
+  shell:
+    chdir: /usr/local/src/luajit2
+    cmd: 'make && make install'
+  when: not ansible_check_mode
+  tags:
+    - nginx
+    - webserver
+
+# Download and install lua-resty-core
+- name: Download lua resty core from github
+  git:
+    repo: https://github.com/openresty/lua-resty-core.git
+    dest: /usr/local/src/lua-resty-core
+  tags:
+    - nginx
+    - webserver
+
+- name: Install lua resty core
+  command:
+    chdir: /usr/local/src/lua-resty-core
+    cmd: make install
+  tags:
+    - nginx
+    - webserver
+
+# Download and install lua-resty-lrucache
+- name: Download lua resty lrucache
+  git:
+    repo: https://github.com/openresty/lua-resty-lrucache.git
+    dest: /usr/local/src/lua-resty-lrucache
+  tags:
+    - nginx
+    - webserver
+
+- name: Install lua resty lrucache
+  command:
+    chdir: /usr/local/src/lua-resty-lrucache
+    cmd: make install
+  tags:
+    - nginx
+    - webserver
+
+# Download nginx modules
+- name: Download ngx_devel_kit from github
+  git:
+    repo: https://github.com/vision5/ngx_devel_kit.git
+    dest: /usr/local/src/ngx_devel_kit
+    version: "{{ ngx_devel_kit_ver }}"
+  tags:
+    - nginx
+    - webserver
+
+- name: Download lua-nginx-module from github
+  git:
+    repo: https://github.com/openresty/lua-nginx-module.git
+    dest: /usr/local/src/lua-nginx-module
+    version: "{{ lua_nginx_module_ver }}"
+  tags:
+    - nginx
+    - webserver
+
+- name: Download naxsi from github
+  git:
+    repo: https://github.com/nbs-system/naxsi.git
+    dest: /usr/local/src/naxsi
+    version: "{{ naxsi_ver }}"
+  tags:
+    - nginx
+    - webserver
+
+- name: Download ngx_http_geoip2_module from github
+  git:
+    repo: https://github.com/leev/ngx_http_geoip2_module.git
+    dest: /usr/local/src/ngx_http_geoip2_module
+    version: "{{ ngx_http_geoip2_module_ver }}"
+  tags:
+    - nginx
+    - webserver
+
+# Download, build and install nginx
+- name: Create nginx group
+  group:
+    name: "{{ nginx_group }}"
+    state: present
+  tags:
+    - nginx
+    - webserver
+
+- name: Create nginx user
+  user:
+    name: "{{ nginx_user }}"
+    group: "{{ nginx_group }}"
+    shell: /sbin/nologin
+    create_home: no
+    home: /home/nginx
+  tags:
+    - nginx
+    - webserver
+
+- name: Create temp directory for nginx
+  file:
+    path: /var/tmp/nginx
+    state: directory
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_group }}"
+    mode: 0755
+  tags:
+    - nginx
+    - webserver
+
+# Reference: http://nginx.org/en/download.html
+- name: Download nginx tar file
+  get_url:
+    url: "{{ nginx_mirror }}/nginx-{{ nginx_ver }}.tar.gz"
+    dest: "/usr/local/src/nginx-{{ nginx_ver }}.tar.gz"
+  tags:
+    - nginx
+    - webserver
+
+- name: Unarchive nginx tar file
+  unarchive:
+    remote_src: yes
+    src: "/usr/local/src/nginx-{{ nginx_ver }}.tar.gz"
+    dest: "/usr/local/src/"
+  when: not ansible_check_mode
+  tags:
+    - nginx
+    - webserver
+
+- name: Upload config.sh file
+  template:
+    src: config.sh
+    dest: "/usr/local/src/nginx-{{ nginx_ver }}/config.sh"
+  tags:
+    - nginx
+    - webserver
+
+- name: Run config.sh
+  shell:
+    chdir: "/usr/local/src/nginx-{{ nginx_ver }}"
+    cmd: 'bash config.sh && make && make install'
+  when: not ansible_check_mode
+  tags:
+    - nginx
+    - webserver
+
+# After installed nginx, Add a following phrase to http directive of nginx.conf.
+# lua_package_path "/usr/local/lib/lua/?.lua;;";
+# Reference: https://github.com/openresty/lua-nginx-module/issues/1633

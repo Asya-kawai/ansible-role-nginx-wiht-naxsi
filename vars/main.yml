@@ -1,0 +1,2 @@
+nginx_user: "{{ 'www' if ansible_os_family == 'FreeBSD' else 'nginx' }}"
+nginx_group: "{{ 'www' if ansible_os_family == 'FreeBSD' else 'nginx' }}"
