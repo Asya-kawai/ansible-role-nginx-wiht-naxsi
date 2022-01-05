@@ -14,11 +14,13 @@ export LUAJIT_INC=/usr/local/include/luajit-2.1
   --http-log-path=/var/log/nginx/access.log \
   --pid-path=/var/run/nginx.pid \
   --lock-path=/var/run/nginx.lock \
+{% if ansible_facts['os_family'] == 'FreeBSD' %}
   --http-client-body-temp-path=/var/tmp/nginx/client_body_temp \
   --http-proxy-temp-path=/var/tmp/nginx/proxy_temp \
   --http-fastcgi-temp-path=/var/tmp/nginx/fastcgi_temp \
   --http-uwsgi-temp-path=/var/tmp/nginx/uwsgi_temp \
   --http-scgi-temp-path=/var/tmp/nginx/scgi_temp \
+{% endif %}
   --user={{ nginx_user }} \
   --group={{ nginx_group }} \
   --with-http_ssl_module \
@@ -51,7 +53,11 @@ export LUAJIT_INC=/usr/local/include/luajit-2.1
   --with-http_v2_module \
   --with-google_perftools_module \
   --with-cc-opt='-I /usr/local/include' \
+{% if ansible_facts['os_family'] == 'FreeBSD' %}
   --with-ld-opt='-L /usr/local/lib' \
+{% else %}
+  --with-ld-opt='-Wl,-rpath,/usr/local/lib' \
+{% endif %}
   --add-module=../ngx_devel_kit \
   --add-module=../lua-nginx-module \
   --add-module=../naxsi/naxsi_src \

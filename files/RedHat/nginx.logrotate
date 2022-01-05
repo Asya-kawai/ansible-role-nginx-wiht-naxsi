@@ -1,0 +1,16 @@
+/var/log/nginx/*.log {
+    missingok
+    notifempty
+    # Create a new file after rotating old one.
+    create
+    #copytruncate
+    rotate 30
+    weekly
+    compress
+    delaycompress
+    dateext
+    sharedscripts
+    postrotate
+       [ ! -f /var/log/nginx/nginx.pid ] || kill -USR1 `cat /var/log/nginx/nginx.pid`
+    endscript
+}

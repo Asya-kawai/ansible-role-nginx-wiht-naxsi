@@ -1,3 +1,19 @@
+- name: Update OS package caches for Debian
+  apt:
+    update_cache: yes
+  when: ansible_facts['os_family'] == 'Debian'
+  tags:
+    - nginx
+    - webserver
+
+- name: Update OS package caches for CentOS
+  dnf:
+    update_cache: yes
+  when: ansible_facts['os_family'] == 'RedHat'
+  tags:
+    - nginx
+    - webserver
+
 - name: Update OS packages
   package:
     name: '*'
@@ -8,7 +24,7 @@
 
 # For Ubuntu
 # Note: Use libssl package.
-- name: Install OS packages
+- name: Install OS packages for Debain
   package:
     name:
       - build-essential
@@ -24,14 +40,14 @@
       - libgeoip-dev
       - libmaxminddb-dev
     state: latest
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   tags:
     - nginx
     - webserver
 
 # For CentOS
 # Note: Don't use openssl pacakge, build from source code.
-- name: Install OS packages
+- name: Install OS packages for CentOS
   package:
     name:
       - gcc
@@ -45,7 +61,7 @@
       - epel-release
       - libmaxminddb-devel
     state: latest
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
   tags:
     - nginx
     - webserver
@@ -73,7 +89,7 @@
   get_url:
     url: "{{ openssl_mirror }}/openssl-{{ openssl_ver }}.tar.gz"
     dest: "/usr/local/src/openssl-{{ openssl_ver }}.tar.gz"
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'FreeBSD'
+  when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
     - webserver
@@ -82,7 +98,7 @@
   stat:
     path: "/usr/local/src/openssl-{{ openssl_ver }}.tar.gz"
   register: openssl_path
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'FreeBSD'
+  when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
     - webserver
@@ -103,7 +119,7 @@
   stat:
     path: "/usr/local/src/openssl-{{ openssl_ver }}"
   register: openssl_dir
-  when: ansible_os_family == 'RedHat' or ansible_os_family == 'FreeBSD'
+  when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
     - webserver
@@ -111,7 +127,7 @@
 - name: Install openssl
   shell:
     chdir: "/usr/local/src/openssl-{{ openssl_ver }}"
-    cmd: 'make && make install'
+    cmd: './config && make && make install'
   when:
     - openssl_dir is defined and 'stat' in openssl_dir and openssl_dir.stat.exists
     - not ansible_check_mode
@@ -154,6 +170,7 @@
   command:
     chdir: /usr/local/src/lua-resty-core
     cmd: make install
+  when: not ansible_check_mode
   tags:
     - nginx
     - webserver
@@ -171,6 +188,7 @@
   command:
     chdir: /usr/local/src/lua-resty-lrucache
     cmd: make install
+  when: not ansible_check_mode
   tags:
     - nginx
     - webserver
@@ -262,6 +280,8 @@
     - nginx
     - webserver
 
+# Reference: http://nginx.org/en/docs/configure.html
+# Note: On FreeBSD, http-*-temp-path and --with-ld-opt parameters are different from others.
 - name: Upload config.sh file
   template:
     src: config.sh
@@ -282,3 +302,67 @@
 # After installed nginx, Add a following phrase to http directive of nginx.conf.
 # lua_package_path "/usr/local/lib/lua/?.lua;;";
 # Reference: https://github.com/openresty/lua-nginx-module/issues/1633
+
+- name: Copy naxsi_core.rules
+  copy:
+    remote_src: yes
+    src: /usr/local/src/naxsi/naxsi_config/naxsi_core.rules
+    dest: /usr/local/etc/nginx/naxsi_core.rules
+  when: not ansible_check_mode
+  tags:
+    - nginxconf
+    - nginx
+    - webserver
+
+- name: Copy nginx basic conf file
+  copy:
+    src: "etc/nginx/{{ inventory_hostname }}/nginx.conf"
+    dest: /usr/local/etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  tags:
+    - nginxconf
+    - nginx
+    - webserver
+
+- name: Copy nginx conf files
+  copy:
+    src: "etc/nginx/{{ inventory_hostname }}/{{ item }}"
+    dest: /usr/local/etc/nginx/
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+   - conf.d
+   - html
+  tags:
+    - nginxconf
+    - nginx
+    - webserver
+
+- name: Copy nginx service setting file
+  copy:
+    src: "../files/{{ ansible_facts['os_family'] }}/nginx.service"
+    dest: /etc/systemd/system/nginx.service
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - nginxconf
+    - nginx
+    - webserver
+
+- name: Copy nginx logrotate setting file
+  copy:
+    src: "../files/{{ ansible_facts['os_family'] }}/nginx.logrotate"
+    dest: /etc/logrotate.d/nginx
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - nginxconf
+    - nginx
+    - webserver
