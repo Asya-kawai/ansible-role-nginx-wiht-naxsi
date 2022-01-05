@@ -316,12 +316,15 @@
 
 - name: Copy nginx basic conf file
   copy:
-    src: "etc/nginx/{{ inventory_hostname }}/nginx.conf"
-    dest: /usr/local/etc/nginx/nginx.conf
+    src: "etc/nginx/{{ inventory_hostname }}/{{ item }}"
+    dest: "/usr/local/etc/nginx/{{ item }}"
     owner: root
     group: root
     mode: 0644
     backup: yes
+  with_items:
+    - nginx.conf
+    - mime.types
   tags:
     - nginxconf
     - nginx

@@ -67,6 +67,23 @@ This role does NOT need to define any variables.
     - user
 ```
 
+## Nginx conf files
+
+This role copy some config files(`nginx.conf`, `mime.types`, `conf.d/*` and `html/*`) in `/usr/loca/etc/nginx/`.
+
+So when you want to copy these files to `ubuntu`(ubuntu is inventory's host name),
+you should make `./etc/nginx/ubuntu/{nginx.conf, mime.types, conf.d/, html/}`.
+
+```
+etc/nginx/ubuntu/
+├── conf.d
+│   ├── your-domain-example.com.conf
+├── html
+│   └── index.html
+├── mime.types
+└── nginx.conf
+```
+
 # How to DryRun and Apply
 
 DryRun
