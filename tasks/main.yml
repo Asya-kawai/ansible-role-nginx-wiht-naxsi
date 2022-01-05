@@ -346,6 +346,7 @@
     - nginx
     - webserver
 
+# Note: FreeBSD's service is NOT implemented yet...
 - name: Copy nginx service setting file
   copy:
     src: "../files/{{ ansible_facts['os_family'] }}/nginx.service"
@@ -353,11 +354,13 @@
     owner: root
     group: root
     mode: 0644
+  when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
   tags:
     - nginxconf
     - nginx
     - webserver
 
+# Note: FreeBSD's logrotate is NOT implemented yet...
 - name: Copy nginx logrotate setting file
   copy:
     src: "../files/{{ ansible_facts['os_family'] }}/nginx.logrotate"
@@ -365,6 +368,7 @@
     owner: root
     group: root
     mode: 0644
+  when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
   tags:
     - nginxconf
     - nginx
