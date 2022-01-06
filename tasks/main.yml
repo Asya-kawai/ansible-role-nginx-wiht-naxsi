@@ -274,7 +274,7 @@
   unarchive:
     remote_src: yes
     src: "/usr/local/src/nginx-{{ nginx_ver }}.tar.gz"
-    dest: "/usr/local/src/"
+    dest: /usr/local/src/
   when: not ansible_check_mode
   tags:
     - nginx
