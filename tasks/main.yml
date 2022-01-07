@@ -284,7 +284,7 @@
 # Note: On FreeBSD, http-*-temp-path and --with-ld-opt parameters are different from others.
 - name: Upload config.sh file
   template:
-    src: config.sh
+    src: config.sh.j2
     dest: "/usr/local/src/nginx-{{ nginx_ver }}/config.sh"
   tags:
     - nginx
