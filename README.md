@@ -10,6 +10,22 @@ Directory tree.
 .
 ├── README.md
 ├── ansible.cfg
+├── etc
+│   └── nginx
+│       ├── centos
+│       │   ├── conf.d
+│       │   │   ├── your-domain-example.com.conf
+│       │   ├── html
+│       │   │   └── index.html
+│       │   ├── mime.types
+│       │   └── nginx.conf
+│       └── ubuntu
+│           ├── conf.d
+│           │   └── your-domain-example.com.conf
+│           ├── html
+│           │   └── index.html
+│           ├── mime.types
+│           └── nginx.conf
 ├── group_vars
 │   ├── all.yml
 │   ├── webserver_centos.yml
