@@ -23,6 +23,8 @@ nginx_redhat_install:
   - gcc
   - make
   - perl
+  - perl-core
+  - libtool
   - pcre-devel
   - zlib-devel
   - libxslt-devel
