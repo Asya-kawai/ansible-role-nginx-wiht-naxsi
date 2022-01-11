@@ -38,7 +38,7 @@
 # Note: Don't use openssl pacakge, build from source code.
 - name: Install OS packages for CentOS
   package:
-    name: "{{ nginx_centos_install }}"
+    name: "{{ nginx_redhat_install }}"
     state: latest
   when: ansible_facts['os_family'] == 'RedHat'
   tags:
