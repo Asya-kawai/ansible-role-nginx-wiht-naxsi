@@ -1,10 +1,10 @@
 ---
 galaxy_info:
   namespace: aintek_xyz
-  role_name: ssh
+  role_name: nginx
   author: Toshiki Kawai
   company: Aintek.xyz
-  description: Set up ssh settings on any systems
+  description: Set up nginx settings on any systems
   license: MIT
   min_ansible_version: 2.9.0
   platforms:
