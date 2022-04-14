@@ -68,6 +68,9 @@
   get_url:
     url: "{{ openssl_mirror }}/openssl-{{ openssl_version }}.tar.gz"
     dest: "/usr/local/src/openssl-{{ openssl_version }}.tar.gz"
+    owner: root
+    group: root
+    mode: 0644
   when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
@@ -250,6 +253,9 @@
   get_url:
     url: "{{ nginx_mirror }}/nginx-{{ nginx_version }}.tar.gz"
     dest: "/usr/local/src/nginx-{{ nginx_version }}.tar.gz"
+    owner: root
+    group: root
+    mode: 0644
   tags:
     - nginx
     - webserver
