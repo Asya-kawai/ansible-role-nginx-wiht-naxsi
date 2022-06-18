@@ -5,6 +5,8 @@
   when: ansible_facts['os_family'] == 'Debian'
   tags:
     - nginx
+    - nginx-update-os-package
+    - nginx-update-os-package-cache
     - webserver
 
 - name: Update OS package caches for CentOS
@@ -13,6 +15,8 @@
   when: ansible_facts['os_family'] == 'RedHat'
   tags:
     - nginx
+    - nginx-update-os-package
+    - nginx-update-os-package-cache
     - webserver
 
 - name: Update OS packages
@@ -21,6 +25,7 @@
     state: latest
   tags:
     - nginx
+    - nginx-update-os-package
     - webserver
 
 # For Ubuntu
@@ -32,6 +37,7 @@
   when: ansible_facts['os_family'] == 'Debian'
   tags:
     - nginx
+    - nginx-install-os-package
     - webserver
 
 # For CentOS
@@ -43,6 +49,7 @@
   when: ansible_facts['os_family'] == 'RedHat'
   tags:
     - nginx
+    - nginx-install-os-package
     - webserver
 
 - name: Delete OS packages of nginx
@@ -52,6 +59,7 @@
     state: absent
   tags:
     - nginx
+    - nginx-delete-os-package-of-nginx
     - webserver
 
 - name: Create a local src directory
@@ -61,6 +69,7 @@
     mode: 0755
   tags:
     - nginx
+    - nginx-create-local-src-directory
     - webserver
 
 # Download, build and install openssl
@@ -74,6 +83,7 @@
   when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
+    - nginx-download-openssl
     - webserver
 
 - name: Check openssl source file exists
@@ -83,6 +93,7 @@
   when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
+    - nginx-check-openssl-source-exists
     - webserver
 
 - name: Unarchive openssl tar file
@@ -95,6 +106,7 @@
     - not ansible_check_mode
   tags:
     - nginx
+    - nginx-unarchive-openssl-files
     - webserver
 
 - name: Check openssl source directory exists
@@ -104,6 +116,7 @@
   when: ansible_facts['os_family'] == 'RedHat' or ansible_facts['os_family'] == 'FreeBSD'
   tags:
     - nginx
+    - nginx-check-openssl-source-directory-exists
     - webserver
 
 - name: Install openssl
@@ -115,6 +128,7 @@
     - not ansible_check_mode
   tags:
     - nginx
+    - nginx-install-openssl
     - webserver
 
 # Download, build and install luajit2
@@ -128,6 +142,7 @@
     version: "{{ luajit_version }}"
   tags:
     - nginx
+    - nginx-download-luajit2
     - webserver
 
 - name: Install luajit2
@@ -138,6 +153,7 @@
   changed_when: false
   tags:
     - nginx
+    - nginx-install-luajit2
     - webserver
 
 # Download and install lua-resty-core
@@ -148,6 +164,7 @@
     version: "{{ lua_resty_core_version }}"
   tags:
     - nginx
+    - nginx-download-lua-resty-core
     - webserver
 
 - name: Install lua resty core
@@ -158,6 +175,7 @@
   changed_when: false
   tags:
     - nginx
+    - nginx-install-lua-resty-core
     - webserver
 
 # Download and install lua-resty-lrucache
@@ -168,6 +186,7 @@
     version: "{{ lua_resty_lrucache_version }}"
   tags:
     - nginx
+    - nginx-download-lua-resty-luacache
     - webserver
 
 - name: Install lua resty lrucache
@@ -178,6 +197,7 @@
   changed_when: false
   tags:
     - nginx
+    - nginx-install-lua-resty-luacache
     - webserver
 
 # Download nginx modules
@@ -188,6 +208,7 @@
     version: "{{ ngx_devel_kit_version }}"
   tags:
     - nginx
+    - nginx-download-ngx-devel-kit
     - webserver
 
 - name: Download lua-nginx-module from github
@@ -197,6 +218,7 @@
     version: "{{ lua_nginx_module_version }}"
   tags:
     - nginx
+    - nginx-install-ngx-devel-kit
     - webserver
 
 - name: Download naxsi from github
@@ -206,6 +228,7 @@
     version: "{{ naxsi_version }}"
   tags:
     - nginx
+    - nginx-download-naxsi
     - webserver
 
 - name: Download ngx_http_geoip2_module from github
@@ -215,6 +238,7 @@
     version: "{{ ngx_http_geoip2_module_version }}"
   tags:
     - nginx
+    - nginx-install-naxsi
     - webserver
 
 # Download, build and install nginx
@@ -224,6 +248,7 @@
     state: present
   tags:
     - nginx
+    - nginx-create-nginx-group
     - webserver
 
 - name: Create nginx user
@@ -235,6 +260,7 @@
     home: /home/nginx
   tags:
     - nginx
+    - nginx-create-nginx-user
     - webserver
 
 - name: Create temp directory for nginx
@@ -246,6 +272,7 @@
     mode: 0755
   tags:
     - nginx
+    - nginx-create-temp-directory
     - webserver
 
 # Reference: http://nginx.org/en/download.html
@@ -258,6 +285,7 @@
     mode: 0644
   tags:
     - nginx
+    - nginx-download-nginx-tar-file
     - webserver
 
 - name: Unarchive nginx tar file
@@ -268,6 +296,7 @@
   when: not ansible_check_mode
   tags:
     - nginx
+    - nginx-unarchive-nginx-tar-file
     - webserver
 
 # Reference: http://nginx.org/en/docs/configure.html
@@ -281,6 +310,7 @@
     mode: 0755
   tags:
     - nginx
+    - nginx-upload-config-sh-files
     - webserver
 
 - name: Run config.sh
@@ -291,6 +321,7 @@
   changed_when: false
   tags:
     - nginx
+    - nginx-run-config-sh
     - webserver
 
 # After installed nginx, Add a following phrase to http directive of nginx.conf.
