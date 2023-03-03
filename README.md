@@ -1,5 +1,7 @@
 # Ansible Role For Nginx Setting
 
+[![CI](https://github.com/Asya-kawai/ansible-role-nginx-with-naxsi/actions/workflows/ci.yml/badge.svg)](https://github.com/Asya-kawai/ansible-role-nginx-with-naxsi/actions/workflows?query=workflow%3ACI)
+
 Setup nginx.
 
 # Examples
