@@ -319,6 +319,7 @@
     cmd: 'bash config.sh && make && make install'
   when: not ansible_check_mode
   changed_when: false
+  notify: Restart nginx
   tags:
     - nginx
     - nginx-run-config-sh
@@ -337,6 +338,7 @@
     group: root
     mode: 0644
   when: not ansible_check_mode
+  notify: Restart nginx
   tags:
     - nginxconf
     - nginx
@@ -355,6 +357,7 @@
     - mime.types
   when:
     - nginx_conf_src_path | length > 0
+  notify: Restart nginx
   tags:
     - nginxconf
     - nginx
@@ -373,6 +376,7 @@
     - html
   when:
     - nginx_conf_src_path | length > 0
+  notify: Restart nginx
   tags:
     - nginxconf
     - nginx
@@ -387,6 +391,7 @@
     group: root
     mode: 0644
   when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
+  notify: Restart nginx
   tags:
     - nginxconf
     - nginx
@@ -408,6 +413,7 @@
   when:
     - ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
     - nginx_service.stat.exists
+  notify: Restart nginx
   tags:
     - nginxconf
     - nginx
