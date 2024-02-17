@@ -223,7 +223,7 @@
 
 - name: Download naxsi from github
   git:
-    repo: https://github.com/nbs-system/naxsi.git
+    repo: https://github.com/wargio/naxsi.git
     dest: /usr/local/src/naxsi
     version: "{{ naxsi_version }}"
   tags:
@@ -332,7 +332,7 @@
 - name: Copy naxsi_core.rules
   copy:
     remote_src: yes
-    src: /usr/local/src/naxsi/naxsi_config/naxsi_core.rules
+    src: /usr/local/src/naxsi/naxsi_rules/naxsi_core.rules
     dest: /usr/local/etc/nginx/naxsi_core.rules
     owner: root
     group: root
