@@ -6,4 +6,5 @@
   listen: Restart nginx
   when:
     - service_default_state | default('started') == 'started'
-    - (ansible_facts['os_family'] == 'Debian') or (ansible_facts['os_family'] == 'RedHat' and (not ansible_check_mode))
+    - (ansible_facts['os_family'] == 'Debian') or (ansible_facts['os_family'] == 'RedHat')
+    - not ansible_check_mode
