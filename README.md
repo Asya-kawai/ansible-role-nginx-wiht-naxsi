@@ -61,6 +61,9 @@ ansible_user: root
 
 # Private_key is saved in local host only!
 ansible_ssh_private_key_file: ""
+
+# The path of nginx configuraiton files
+nginx_conf_src_path: etc/nginx/ubuntu
 ```
 
 ## Group Vars / Ubuntu(webserver_ubuntu.yml)
